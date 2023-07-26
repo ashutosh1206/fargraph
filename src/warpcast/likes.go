@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type userCastInfo struct {
+type UserCastInfo struct {
 	Hash   string `json:"hash"`
 	Author struct {
 		Fid      int    `json:"fid"`
@@ -17,15 +17,15 @@ type userCastInfo struct {
 
 type userLikedCastsResponse struct {
 	Result struct {
-		Casts []userCastInfo `json:"casts"`
+		Casts []UserCastInfo `json:"casts"`
 	} `json:"result"`
 	Next struct {
 		Cursor string `json:"cursor"`
 	} `json:"next"`
 }
 
-func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, cursor string, limit int) ([]userCastInfo, string, error) {
-	userLikedCasts := make([]userCastInfo, 0, limit)
+func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, cursor string, limit int) ([]UserCastInfo, string, error) {
+	userLikedCasts := make([]UserCastInfo, 0, limit)
 
 	// Preparing the request
 	request, err := http.NewRequest(

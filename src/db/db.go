@@ -7,6 +7,8 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
+// TODO: optimise insertions with bulk-insertions
+
 func InsertFollowersToDB(followers []warpcast.WarpcastUserInfo, username string, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
 	for _, follower := range followers {
 		_, err := neo4j.ExecuteQuery(
@@ -51,6 +53,56 @@ func InsertFollowingToDB(following []warpcast.WarpcastUserInfo, username string,
 			driver,
 			"MATCH (u1:User {fid: $fid1, username: $username1}), (u2:User {fid: $fid2, username: $username2}) MERGE (u1)-[r:FOLLOWS]->(u2)",
 			map[string]any{"fid2": followee.Fid, "username2": followee.Username, "fid1": fid, "username1": username},
+			neo4j.EagerResultTransformer,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func InsertUserLikesToDB(likedCasts []warpcast.UserCastInfo, fid int, username string, ctx context.Context, driver neo4j.DriverWithContext) error {
+	for _, cast := range likedCasts {
+		// Create User node
+		_, err := neo4j.ExecuteQuery(
+			ctx,
+			driver,
+			"MERGE (u:User {fid: $fid, username: $username})",
+			map[string]any{"fid": cast.Author.Fid, "username": cast.Author.Username},
+			neo4j.EagerResultTransformer,
+		)
+		if err != nil {
+			return err
+		}
+		// Create Cast node
+		_, err = neo4j.ExecuteQuery(
+			ctx,
+			driver,
+			"MERGE (c:Cast {hash: $hash})",
+			map[string]any{"hash": cast.Hash},
+			neo4j.EagerResultTransformer,
+		)
+		if err != nil {
+			return err
+		}
+		// Create a PUBLISHED edge between User (author) and Cast
+		_, err = neo4j.ExecuteQuery(
+			ctx,
+			driver,
+			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:PUBLISHED]-(c)",
+			map[string]any{"hash": cast.Hash, "fid": cast.Author.Fid, "username": cast.Author.Username},
+			neo4j.EagerResultTransformer,
+		)
+		if err != nil {
+			return err
+		}
+		// Create a LIKED edge between User and Cast
+		_, err = neo4j.ExecuteQuery(
+			ctx,
+			driver,
+			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:LIKED]-(c)",
+			map[string]any{"hash": cast.Hash, "fid": fid, "username": username},
 			neo4j.EagerResultTransformer,
 		)
 		if err != nil {

@@ -114,5 +114,25 @@ func main() {
 	}
 	fmt.Println("Inserted following")
 
+	fmt.Println("Getting list of posts liked by user")
+	likedPostsPaginated, cursor, err := warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		panic(err)
+	}
+	err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+	if err != nil {
+		panic(err)
+	}
+	for cursor != "" {
+		likedPostsPaginated, cursor, err = warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			panic(err)
+		}
+		err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println("Inserted liked posts")
 	httpClient.CloseIdleConnections()
 }
