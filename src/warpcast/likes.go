@@ -72,5 +72,5 @@ func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, curs
 	}
 	userLikedCasts = responseStruct.Result.Casts
 
-	return userLikedCasts, "", nil
+	return userLikedCasts, responseStruct.Next.Cursor, nil
 }
