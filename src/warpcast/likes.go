@@ -8,11 +8,17 @@ import (
 )
 
 type UserCastInfo struct {
-	Hash   string `json:"hash"`
-	Author struct {
+	Hash       string `json:"hash"`
+	ParentHash string `json:"parentHash"`
+	Author     struct {
 		Fid      int    `json:"fid"`
 		Username string `json:"username"`
 	} `json:"author"`
+	ParentAuthor struct {
+		Fid      int    `json:"fid"`
+		Username string `json:"username"`
+	} `json:"parentAuthor"`
+	Recast bool `json:"recast"`
 }
 
 type userLikedCastsResponse struct {

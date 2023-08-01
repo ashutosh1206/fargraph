@@ -134,5 +134,27 @@ func main() {
 		}
 	}
 	fmt.Println("Inserted liked posts")
+
+	fmt.Println("Getting user casts, recasts and replies")
+	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		panic(err)
+	}
+	err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+	if err != nil {
+		panic(err)
+	}
+	for cursor != "" {
+		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			panic(err)
+		}
+		err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println("Inserted user casts, recasts and replies")
+
 	httpClient.CloseIdleConnections()
 }
