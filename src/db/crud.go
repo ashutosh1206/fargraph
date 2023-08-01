@@ -29,6 +29,8 @@ func InsertPostNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, has
 }
 
 func CreateFollowsEdge(ctx context.Context, driver neo4j.DriverWithContext, fid1 int, fid2 int) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
+	// without username
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
@@ -40,6 +42,8 @@ func CreateFollowsEdge(ctx context.Context, driver neo4j.DriverWithContext, fid1
 }
 
 func CreatePublishedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid int, hash string) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
+	// without username
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
@@ -51,6 +55,8 @@ func CreatePublishedEdge(ctx context.Context, driver neo4j.DriverWithContext, fi
 }
 
 func CreateLikedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid int, hash string) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
+	// without username
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
@@ -62,10 +68,12 @@ func CreateLikedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid in
 }
 
 func CreateRecastedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid int, hash string) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
+	// without username
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
-		"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid}) MERGE (u)-[r:RECASTED]-(c)",
+		"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid}) MERGE (u)-[r:RECASTED]->(c)",
 		map[string]any{"hash": hash, "fid": fid},
 		neo4j.EagerResultTransformer,
 	)
@@ -73,10 +81,12 @@ func CreateRecastedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid
 }
 
 func CreateChildOfEdge(ctx context.Context, driver neo4j.DriverWithContext, parentHash string, childHash string) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
+	// without username
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
-		"MATCH (pc:Cast {hash: $parentHash}), (cc:Cast {hash: $childHash}) MERGE (cc)-[r:CHILD_OF]-(pc)",
+		"MATCH (pc:Cast {hash: $parentHash}), (cc:Cast {hash: $childHash}) MERGE (cc)-[r:CHILD_OF]->(pc)",
 		map[string]any{"parentHash": parentHash, "childHash": childHash},
 		neo4j.EagerResultTransformer,
 	)
