@@ -50,15 +50,18 @@ func main() {
 	// TODO: user input
 	username := "ashutosh"
 
-	// TODO: get fid programmatically
-	fid := 5267
-
 	// TODO: get app bearer token programmatically
 	appBearerToken := os.Getenv("APP_BEARER_TOKEN")
 
 	pageLimit := 100
 
 	httpClient := http.DefaultClient
+
+	userInfo, err := warpcast.GetUserInfoByUsername(username, appBearerToken, httpClient)
+	if err != nil {
+		panic(err)
+	}
+	fid := userInfo.Fid
 
 	// Insert source node
 	_, err = neo4j.ExecuteQuery(
