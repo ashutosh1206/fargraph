@@ -11,50 +11,25 @@ import (
 
 func InsertFollowersToDB(followers []warpcast.WarpcastUserInfo, username string, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
 	for _, follower := range followers {
-		_, err := neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (u:User {fid: $fid, username: $username})",
-			map[string]any{"fid": follower.Fid, "username": follower.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err := InsertUserNodeToDB(ctx, driver, follower.Fid, follower.Username)
 		if err != nil {
 			return err
 		}
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (u1:User {fid: $fid1, username: $username1}), (u2:User {fid: $fid2, username: $username2}) MERGE (u1)-[r:FOLLOWS]->(u2)",
-			map[string]any{"fid1": follower.Fid, "username1": follower.Username, "fid2": fid, "username2": username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreateFollowsEdge(ctx, driver, follower.Fid, fid)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
 func InsertFollowingToDB(following []warpcast.WarpcastUserInfo, username string, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
 	for _, followee := range following {
-		_, err := neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (u:User {fid: $fid, username: $username})",
-			map[string]any{"fid": followee.Fid, "username": followee.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err := InsertUserNodeToDB(ctx, driver, followee.Fid, followee.Username)
 		if err != nil {
 			return err
 		}
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (u1:User {fid: $fid1, username: $username1}), (u2:User {fid: $fid2, username: $username2}) MERGE (u1)-[r:FOLLOWS]->(u2)",
-			map[string]any{"fid2": followee.Fid, "username2": followee.Username, "fid1": fid, "username1": username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreateFollowsEdge(ctx, driver, fid, followee.Fid)
 		if err != nil {
 			return err
 		}
@@ -65,46 +40,22 @@ func InsertFollowingToDB(following []warpcast.WarpcastUserInfo, username string,
 func InsertUserLikesToDB(likedCasts []warpcast.UserCastInfo, fid int, username string, ctx context.Context, driver neo4j.DriverWithContext) error {
 	for _, cast := range likedCasts {
 		// Create User node
-		_, err := neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (u:User {fid: $fid, username: $username})",
-			map[string]any{"fid": cast.Author.Fid, "username": cast.Author.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
 		if err != nil {
 			return err
 		}
 		// Create Cast node
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (c:Cast {hash: $hash})",
-			map[string]any{"hash": cast.Hash},
-			neo4j.EagerResultTransformer,
-		)
+		err = InsertCastNodeToDB(ctx, driver, cast.Hash)
 		if err != nil {
 			return err
 		}
 		// Create a PUBLISHED edge between User (author) and Cast
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:PUBLISHED]-(c)",
-			map[string]any{"hash": cast.Hash, "fid": cast.Author.Fid, "username": cast.Author.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreatePublishedEdge(ctx, driver, cast.Author.Fid, cast.Hash)
 		if err != nil {
 			return err
 		}
 		// Create a LIKED edge between User and Cast
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:LIKED]-(c)",
-			map[string]any{"hash": cast.Hash, "fid": fid, "username": username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreateLikedEdge(ctx, driver, fid, cast.Hash)
 		if err != nil {
 			return err
 		}
@@ -115,50 +66,26 @@ func InsertUserLikesToDB(likedCasts []warpcast.UserCastInfo, fid int, username s
 func InsertUserPostsToDB(casts []warpcast.UserCastInfo, fid int, username string, ctx context.Context, driver neo4j.DriverWithContext) error {
 	for _, cast := range casts {
 		// Create User node for Author
-		_, err := neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (u:User {fid: $fid, username: $username})",
-			map[string]any{"fid": cast.Author.Fid, "username": cast.Author.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
 		if err != nil {
 			return err
 		}
 
 		// Create Cast node
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (c:Cast {hash: $hash})",
-			map[string]any{"hash": cast.Hash},
-			neo4j.EagerResultTransformer,
-		)
+		err = InsertCastNodeToDB(ctx, driver, cast.Hash)
 		if err != nil {
 			return err
 		}
 
 		// Create a PUBLISHED edge between User (author) and Cast
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:PUBLISHED]-(c)",
-			map[string]any{"hash": cast.Hash, "fid": cast.Author.Fid, "username": cast.Author.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreatePublishedEdge(ctx, driver, cast.Author.Fid, cast.Hash)
 		if err != nil {
 			return err
 		}
 
 		if cast.Recast {
-			// Create a RECASTED edge between username,fid and Cast
-			_, err = neo4j.ExecuteQuery(
-				ctx,
-				driver,
-				"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:RECASTED]-(c)",
-				map[string]any{"hash": cast.Hash, "fid": fid, "username": username},
-				neo4j.EagerResultTransformer,
-			)
+			// Create a RECASTED edge between fid and Cast
+			err = CreateRecastedEdge(ctx, driver, fid, cast.Hash)
 			if err != nil {
 				return err
 			}
@@ -175,50 +102,26 @@ func InsertUserPostsToDB(casts []warpcast.UserCastInfo, fid int, username string
 		// Reply cast
 
 		// Create User node for Parent author
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (u:User {fid: $fid, username: $username})",
-			map[string]any{"fid": cast.ParentAuthor.Fid, "username": cast.ParentAuthor.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err = InsertUserNodeToDB(ctx, driver, cast.ParentAuthor.Fid, cast.ParentAuthor.Username)
 		if err != nil {
 			return err
 		}
 
 		// Create Cast node for parent cast
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MERGE (c:Cast {hash: $hash})",
-			map[string]any{"hash": cast.ParentHash},
-			neo4j.EagerResultTransformer,
-		)
+		err = InsertCastNodeToDB(ctx, driver, cast.ParentHash)
 		if err != nil {
 			return err
 		}
 
 		// Create a PUBLISHED edge between User node (Parent author)
 		// and Cast node (Parent cast)
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (c:Cast {hash: $hash}), (u:User {fid: $fid, username: $username}) MERGE (u)-[r:PUBLISHED]-(c)",
-			map[string]any{"hash": cast.ParentHash, "fid": cast.ParentAuthor.Fid, "username": cast.ParentAuthor.Username},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreatePublishedEdge(ctx, driver, cast.ParentAuthor.Fid, cast.ParentHash)
 		if err != nil {
 			return err
 		}
 
 		// Create a CHILD_OF edge between Cast node (Parent cast) and Cast node
-		_, err = neo4j.ExecuteQuery(
-			ctx,
-			driver,
-			"MATCH (pc:Cast {hash: $parentHash}), (cc:Cast {hash: $childHash}) MERGE (cc)-[r:CHILD_OF]-(pc)",
-			map[string]any{"parentHash": cast.ParentHash, "childHash": cast.Hash},
-			neo4j.EagerResultTransformer,
-		)
+		err = CreateChildOfEdge(ctx, driver, cast.ParentHash, cast.Hash)
 		if err != nil {
 			return err
 		}
