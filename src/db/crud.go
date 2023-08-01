@@ -17,7 +17,7 @@ func InsertUserNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, fid
 	return err
 }
 
-func InsertPostNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, hash string) error {
+func InsertCastNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, hash string) error {
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
@@ -28,6 +28,7 @@ func InsertPostNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, has
 	return err
 }
 
+// CreateFollowsEdge creates a directional FOLLOW edge from `fid1` to `fid2`
 func CreateFollowsEdge(ctx context.Context, driver neo4j.DriverWithContext, fid1 int, fid2 int) error {
 	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node
 	// without username
