@@ -56,7 +56,7 @@ func main() {
 	// TODO: get app bearer token programmatically
 	appBearerToken := os.Getenv("APP_BEARER_TOKEN")
 
-	// pageLimit := 100
+	pageLimit := 100
 
 	httpClient := http.DefaultClient
 
@@ -136,7 +136,7 @@ func main() {
 	fmt.Println("Inserted liked posts")
 
 	fmt.Println("Getting user casts, recasts and replies")
-	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", 10)
+	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", pageLimit)
 	if err != nil {
 		panic(err)
 	}
@@ -145,7 +145,7 @@ func main() {
 		panic(err)
 	}
 	for cursor != "" {
-		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, 10)
+		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
 		if err != nil {
 			panic(err)
 		}
