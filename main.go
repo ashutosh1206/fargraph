@@ -12,17 +12,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func connectToDB(
-	dbUri string,
-	dbUsername string,
-	dbPassword string,
-	ctx context.Context,
-) (neo4j.DriverWithContext, error) {
-	var driver neo4j.DriverWithContext
-
-	return driver, nil
-}
-
 func retrieveUserFollowers(
 	ctx context.Context,
 	driver neo4j.DriverWithContext,
