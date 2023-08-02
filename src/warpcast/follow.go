@@ -74,7 +74,7 @@ func GetFollowersPaginated(
 	defer response.Body.Close()
 
 	// Validating status code of response
-	if response.StatusCode > 300 || response.StatusCode < 100 {
+	if response.StatusCode > 400 || response.StatusCode < 200 {
 		return followers, "", fmt.Errorf("invalid status code: %d", response.StatusCode)
 	}
 

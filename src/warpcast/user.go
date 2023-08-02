@@ -39,7 +39,7 @@ func GetUserInfoByUsername(username string, appBearerToken string, client *http.
 	defer response.Body.Close()
 
 	// Validating status code of response
-	if response.StatusCode > 300 || response.StatusCode < 100 {
+	if response.StatusCode > 400 || response.StatusCode < 200 {
 		return userInfo, fmt.Errorf("invalid status code: %d", response.StatusCode)
 	}
 

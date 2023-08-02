@@ -60,7 +60,7 @@ func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, curs
 	defer response.Body.Close()
 
 	// Validating status code of response
-	if response.StatusCode > 300 || response.StatusCode < 100 {
+	if response.StatusCode > 400 || response.StatusCode < 200 {
 		return userLikedCasts, "", fmt.Errorf("invalid status code: %d", response.StatusCode)
 	}
 
