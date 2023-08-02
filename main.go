@@ -23,6 +23,126 @@ func connectToDB(
 	return driver, nil
 }
 
+func retrieveUserFollowers(
+	ctx context.Context,
+	driver neo4j.DriverWithContext,
+	fid int,
+	username string,
+	pageLimit int,
+	appBearerToken string,
+	httpClient *http.Client,
+) error {
+	followersPaginated, cursor, err := warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		return err
+	}
+	err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
+	if err != nil {
+		return err
+	}
+	for cursor != "" {
+		followersPaginated, cursor, err = warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			return err
+		}
+		err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func retrieveUserFollowing(
+	ctx context.Context,
+	driver neo4j.DriverWithContext,
+	fid int,
+	username string,
+	pageLimit int,
+	appBearerToken string,
+	httpClient *http.Client,
+) error {
+	followingPaginated, cursor, err := warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		return err
+	}
+	err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
+	if err != nil {
+		return err
+	}
+	for cursor != "" {
+		followingPaginated, cursor, err = warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			return err
+		}
+		err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func retrieveUserLikedCasts(
+	ctx context.Context,
+	driver neo4j.DriverWithContext,
+	fid int,
+	username string,
+	pageLimit int,
+	appBearerToken string,
+	httpClient *http.Client,
+) error {
+	likedPostsPaginated, cursor, err := warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		return err
+	}
+	err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+	if err != nil {
+		return err
+	}
+	for cursor != "" {
+		likedPostsPaginated, cursor, err = warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			return err
+		}
+		err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func retrieveUserCasts(
+	ctx context.Context,
+	driver neo4j.DriverWithContext,
+	fid int,
+	username string,
+	pageLimit int,
+	appBearerToken string,
+	httpClient *http.Client,
+) error {
+	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	if err != nil {
+		return err
+	}
+	err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+	if err != nil {
+		return err
+	}
+	for cursor != "" {
+		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		if err != nil {
+			return err
+		}
+		err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func main() {
 	// Load .env
 	err := godotenv.Load()
@@ -64,98 +184,36 @@ func main() {
 	fid := userInfo.Fid
 
 	// Insert source node
-	_, err = neo4j.ExecuteQuery(
-		ctx,
-		driver,
-		"MERGE (u:User {fid: $fid, username: $username})",
-		map[string]any{"fid": fid, "username": username},
-		neo4j.EagerResultTransformer,
-	)
+	err = db.InsertUserNodeToDB(ctx, driver, fid, username)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Getting followers")
-	followersPaginated, cursor, err := warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	err = retrieveUserFollowers(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
 	if err != nil {
 		panic(err)
-	}
-	err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
-	if err != nil {
-		panic(err)
-	}
-	for cursor != "" {
-		followersPaginated, cursor, err = warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
-		if err != nil {
-			panic(err)
-		}
-		err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
-		if err != nil {
-			panic(err)
-		}
 	}
 	fmt.Println("Inserted followers")
 
 	fmt.Println("Getting following")
-	followingPaginated, cursor, err := warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	err = retrieveUserFollowing(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
 	if err != nil {
 		panic(err)
-	}
-	err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
-	if err != nil {
-		panic(err)
-	}
-	for cursor != "" {
-		followingPaginated, cursor, err = warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
-		if err != nil {
-			panic(err)
-		}
-		err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
-		if err != nil {
-			panic(err)
-		}
 	}
 	fmt.Println("Inserted following")
 
 	fmt.Println("Getting list of posts liked by user")
-	likedPostsPaginated, cursor, err := warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	err = retrieveUserLikedCasts(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
 	if err != nil {
 		panic(err)
-	}
-	err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
-	if err != nil {
-		panic(err)
-	}
-	for cursor != "" {
-		likedPostsPaginated, cursor, err = warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
-		if err != nil {
-			panic(err)
-		}
-		err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
-		if err != nil {
-			panic(err)
-		}
 	}
 	fmt.Println("Inserted liked posts")
 
 	fmt.Println("Getting user casts, recasts and replies")
-	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	err = retrieveUserCasts(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
 	if err != nil {
 		panic(err)
-	}
-	err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
-	if err != nil {
-		panic(err)
-	}
-	for cursor != "" {
-		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
-		if err != nil {
-			panic(err)
-		}
-		err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
-		if err != nil {
-			panic(err)
-		}
 	}
 	fmt.Println("Inserted user casts, recasts and replies")
 
