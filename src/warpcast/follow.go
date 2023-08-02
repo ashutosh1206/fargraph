@@ -3,8 +3,8 @@ package warpcast
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+	"net/url"
 )
 
 type WarpcastUserInfo struct {
@@ -47,39 +47,19 @@ func GetFollowersPaginated(
 ) ([]WarpcastUserInfo, string, error) {
 	followers := make([]WarpcastUserInfo, 0, limit)
 
-	// Preparing the request
-	request, err := http.NewRequest(
-		"GET",
-		"https://api.warpcast.com/v2/followers",
-		nil,
-	)
-	if err != nil {
-		return followers, "", err
-	}
-	query := request.URL.Query()
+	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
 	query.Add("limit", fmt.Sprint(limit))
 	if cursor != "" {
 		query.Add("cursor", cursor)
 	}
-	request.URL.RawQuery = query.Encode()
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", appBearerToken))
 
-	// Sending the request
-	response, err := client.Do(request)
-	if err != nil {
-		return followers, "", err
-	}
-	defer response.Body.Close()
-
-	// Validating status code of response
-	if response.StatusCode > 400 || response.StatusCode < 200 {
-		return followers, "", fmt.Errorf("invalid status code: %d", response.StatusCode)
-	}
-
-	// Reading response
-	respBody, err := io.ReadAll(response.Body)
+	respBody, err := makeWarpcastRequest(
+		"https://api.warpcast.com/v2/followers",
+		query,
+		appBearerToken,
+		client,
+	)
 	if err != nil {
 		return followers, "", err
 	}
@@ -104,39 +84,19 @@ func GetFollowingPaginated(
 ) ([]WarpcastUserInfo, string, error) {
 	following := make([]WarpcastUserInfo, 0, limit)
 
-	// Preparing the request
-	request, err := http.NewRequest(
-		"GET",
-		"https://api.warpcast.com/v2/following",
-		nil,
-	)
-	if err != nil {
-		return following, "", err
-	}
-	query := request.URL.Query()
+	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
 	query.Add("limit", fmt.Sprint(limit))
 	if cursor != "" {
 		query.Add("cursor", cursor)
 	}
-	request.URL.RawQuery = query.Encode()
-	request.Header.Add("Accept", "application/json")
-	request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", appBearerToken))
 
-	// Sending the request
-	response, err := client.Do(request)
-	if err != nil {
-		return following, "", err
-	}
-	defer response.Body.Close()
-
-	// Validating status code of response
-	if response.StatusCode > 300 || response.StatusCode < 100 {
-		return following, "", fmt.Errorf("invalid status code: %d", response.StatusCode)
-	}
-
-	// Reading response
-	respBody, err := io.ReadAll(response.Body)
+	respBody, err := makeWarpcastRequest(
+		"https://api.warpcast.com/v2/following",
+		query,
+		appBearerToken,
+		client,
+	)
 	if err != nil {
 		return following, "", err
 	}
