@@ -51,8 +51,13 @@ func (client *FCRequestClient) GetFollowersPaginated(
 		query.Add("cursor", cursor)
 	}
 
+	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/followers")
+	if err != nil {
+		return followers, "", err
+	}
+
 	respBody, err := makeWarpcastRequest(
-		"https://api.warpcast.com/v2/followers",
+		requestUrl,
 		query,
 		client.appBearerToken,
 		client.HTTPClient,
@@ -86,8 +91,13 @@ func (client *FCRequestClient) GetFollowingPaginated(
 		query.Add("cursor", cursor)
 	}
 
+	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/following")
+	if err != nil {
+		return following, "", err
+	}
+
 	respBody, err := makeWarpcastRequest(
-		"https://api.warpcast.com/v2/following",
+		requestUrl,
 		query,
 		client.appBearerToken,
 		client.HTTPClient,
