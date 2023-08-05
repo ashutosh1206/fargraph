@@ -13,4 +13,5 @@ To setup the tool:
 + Compile the binary by running: `go build .`, assuming you are in the root directory of the project
 
 To run the tool:
-`./farcaster <username>`, where `username` is the user whose social graph you want to export
+
+Run `./farcaster <username>`, where `username` is the user whose social graph you want to export
