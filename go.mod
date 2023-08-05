@@ -1,4 +1,4 @@
-module github.com/farcaster-graph
+module github.com/ashutosh1206/fargraph
 
 go 1.20
 

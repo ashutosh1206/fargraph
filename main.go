@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/farcaster-graph/src/db"
-	"github.com/farcaster-graph/src/warpcast"
+	"github.com/ashutosh1206/fargraph/pkg/farcaster"
+	"github.com/ashutosh1206/fargraph/src/db"
 	"github.com/joho/godotenv"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
@@ -17,7 +17,7 @@ func retrieveUserFollowers(
 	driver neo4j.DriverWithContext,
 	fid int,
 	pageLimit int,
-	fcClient *warpcast.FCRequestClient,
+	fcClient *farcaster.FCRequestClient,
 ) error {
 	followersPaginated, cursor, err := fcClient.GetFollowersPaginated(fid, "", pageLimit)
 	if err != nil {
@@ -45,7 +45,7 @@ func retrieveUserFollowing(
 	driver neo4j.DriverWithContext,
 	fid int,
 	pageLimit int,
-	fcClient *warpcast.FCRequestClient,
+	fcClient *farcaster.FCRequestClient,
 ) error {
 	followingPaginated, cursor, err := fcClient.GetFollowingPaginated(fid, "", pageLimit)
 	if err != nil {
@@ -73,7 +73,7 @@ func retrieveUserLikedCasts(
 	driver neo4j.DriverWithContext,
 	fid int,
 	pageLimit int,
-	fcClient *warpcast.FCRequestClient,
+	fcClient *farcaster.FCRequestClient,
 ) error {
 	likedCastsPaginated, cursor, err := fcClient.GetUserLikedPaginated(fid, "", pageLimit)
 	if err != nil {
@@ -101,7 +101,7 @@ func retrieveUserCasts(
 	driver neo4j.DriverWithContext,
 	fid int,
 	pageLimit int,
-	fcClient *warpcast.FCRequestClient,
+	fcClient *farcaster.FCRequestClient,
 ) error {
 	userCastsPaginated, cursor, err := fcClient.GetUserCastsPaginated(fid, "", pageLimit)
 	if err != nil {
@@ -160,7 +160,7 @@ func main() {
 	pageLimit := 100
 
 	httpClient := http.DefaultClient
-	fcRequestClient := warpcast.GetFCRequestClient("https://api.warpcast.com", appBearerToken, httpClient)
+	fcRequestClient := farcaster.GetFCRequestClient("https://api.warpcast.com", appBearerToken, httpClient)
 
 	userInfo, err := fcRequestClient.GetUserInfoByUsername(username)
 	if err != nil {
