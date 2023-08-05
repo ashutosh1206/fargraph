@@ -23,7 +23,7 @@ func retrieveUserFollowers(
 	if err != nil {
 		return err
 	}
-	err = db.InsertFollowersToDB(followersPaginated, fid, ctx, driver)
+	err = db.InsertFollowersToDB(ctx, driver, followersPaginated, fid)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func retrieveUserFollowers(
 		if err != nil {
 			return err
 		}
-		err = db.InsertFollowersToDB(followersPaginated, fid, ctx, driver)
+		err = db.InsertFollowersToDB(ctx, driver, followersPaginated, fid)
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ func retrieveUserFollowing(
 	if err != nil {
 		return err
 	}
-	err = db.InsertFollowingToDB(followingPaginated, fid, ctx, driver)
+	err = db.InsertFollowingToDB(ctx, driver, followingPaginated, fid)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func retrieveUserFollowing(
 		if err != nil {
 			return err
 		}
-		err = db.InsertFollowingToDB(followingPaginated, fid, ctx, driver)
+		err = db.InsertFollowingToDB(ctx, driver, followingPaginated, fid)
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func retrieveUserLikedCasts(
 	if err != nil {
 		return err
 	}
-	err = db.InsertUserLikesToDB(likedCastsPaginated, fid, ctx, driver)
+	err = db.InsertUserLikesToDB(ctx, driver, likedCastsPaginated, fid)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func retrieveUserLikedCasts(
 		if err != nil {
 			return err
 		}
-		err = db.InsertUserLikesToDB(likedCastsPaginated, fid, ctx, driver)
+		err = db.InsertUserLikesToDB(ctx, driver, likedCastsPaginated, fid)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func retrieveUserCasts(
 	if err != nil {
 		return err
 	}
-	err = db.InsertUserPostsToDB(userCastsPaginated, fid, ctx, driver)
+	err = db.InsertUserPostsToDB(ctx, driver, userCastsPaginated, fid)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func retrieveUserCasts(
 		if err != nil {
 			return err
 		}
-		err = db.InsertUserPostsToDB(userCastsPaginated, fid, ctx, driver)
+		err = db.InsertUserPostsToDB(ctx, driver, userCastsPaginated, fid)
 		if err != nil {
 			return err
 		}

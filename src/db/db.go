@@ -9,7 +9,7 @@ import (
 
 // TODO: optimise insertions with bulk-insertions
 
-func InsertFollowersToDB(followers []warpcast.User, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
+func InsertFollowersToDB(ctx context.Context, driver neo4j.DriverWithContext, followers []warpcast.User, fid int) error {
 	for _, follower := range followers {
 		err := InsertUserNodeToDB(ctx, driver, follower.Fid, follower.Username)
 		if err != nil {
@@ -23,7 +23,7 @@ func InsertFollowersToDB(followers []warpcast.User, fid int, ctx context.Context
 	return nil
 }
 
-func InsertFollowingToDB(following []warpcast.User, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
+func InsertFollowingToDB(ctx context.Context, driver neo4j.DriverWithContext, following []warpcast.User, fid int) error {
 	for _, followee := range following {
 		err := InsertUserNodeToDB(ctx, driver, followee.Fid, followee.Username)
 		if err != nil {
@@ -37,7 +37,7 @@ func InsertFollowingToDB(following []warpcast.User, fid int, ctx context.Context
 	return nil
 }
 
-func InsertUserLikesToDB(likedCasts []warpcast.Cast, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
+func InsertUserLikesToDB(ctx context.Context, driver neo4j.DriverWithContext, likedCasts []warpcast.Cast, fid int) error {
 	for _, cast := range likedCasts {
 		// Create User node
 		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
@@ -63,7 +63,7 @@ func InsertUserLikesToDB(likedCasts []warpcast.Cast, fid int, ctx context.Contex
 	return nil
 }
 
-func InsertUserPostsToDB(casts []warpcast.Cast, fid int, ctx context.Context, driver neo4j.DriverWithContext) error {
+func InsertUserPostsToDB(ctx context.Context, driver neo4j.DriverWithContext, casts []warpcast.Cast, fid int) error {
 	for _, cast := range casts {
 		// Create User node for Author
 		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
