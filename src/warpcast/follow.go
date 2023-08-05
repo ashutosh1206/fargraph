@@ -3,7 +3,6 @@ package warpcast
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 )
 
@@ -38,10 +37,8 @@ type WarpcastResponse struct {
 	} `json:"next"`
 }
 
-func GetFollowersPaginated(
+func (client *FCRequestClient) GetFollowersPaginated(
 	fid int,
-	appBearerToken string,
-	client *http.Client,
 	cursor string,
 	limit int,
 ) ([]WarpcastUserInfo, string, error) {
@@ -57,8 +54,8 @@ func GetFollowersPaginated(
 	respBody, err := makeWarpcastRequest(
 		"https://api.warpcast.com/v2/followers",
 		query,
-		appBearerToken,
-		client,
+		client.appBearerToken,
+		client.HTTPClient,
 	)
 	if err != nil {
 		return followers, "", err
@@ -75,10 +72,8 @@ func GetFollowersPaginated(
 	return followers, responseStruct.Next.Cursor, nil
 }
 
-func GetFollowingPaginated(
+func (client *FCRequestClient) GetFollowingPaginated(
 	fid int,
-	appBearerToken string,
-	client *http.Client,
 	cursor string,
 	limit int,
 ) ([]WarpcastUserInfo, string, error) {
@@ -94,8 +89,8 @@ func GetFollowingPaginated(
 	respBody, err := makeWarpcastRequest(
 		"https://api.warpcast.com/v2/following",
 		query,
-		appBearerToken,
-		client,
+		client.appBearerToken,
+		client.HTTPClient,
 	)
 	if err != nil {
 		return following, "", err
