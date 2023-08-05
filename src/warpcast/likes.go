@@ -3,7 +3,6 @@ package warpcast
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 )
 
@@ -30,7 +29,7 @@ type userLikedCastsResponse struct {
 	} `json:"next"`
 }
 
-func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, cursor string, limit int) ([]UserCastInfo, string, error) {
+func (client *FCRequestClient) GetUserLikedCasts(fid int, cursor string, limit int) ([]UserCastInfo, string, error) {
 	userLikedCasts := make([]UserCastInfo, 0, limit)
 
 	query := make(url.Values, 3)
@@ -43,8 +42,8 @@ func GetUserLikedCasts(fid int, appBearerToken string, client *http.Client, curs
 	respBody, err := makeWarpcastRequest(
 		"https://api.warpcast.com/v2/user-liked-casts",
 		query,
-		appBearerToken,
-		client,
+		client.appBearerToken,
+		client.HTTPClient,
 	)
 	if err != nil {
 		return userLikedCasts, "", err

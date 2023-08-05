@@ -3,14 +3,11 @@ package warpcast
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 )
 
-func GetUserCasts(
+func (client *FCRequestClient) GetUserCasts(
 	fid int,
-	appBearerToken string,
-	client *http.Client,
 	cursor string,
 	limit int,
 ) ([]UserCastInfo, string, error) {
@@ -26,8 +23,8 @@ func GetUserCasts(
 	respBody, err := makeWarpcastRequest(
 		"https://api.warpcast.com/v2/casts",
 		query,
-		appBearerToken,
-		client,
+		client.appBearerToken,
+		client.HTTPClient,
 	)
 	if err != nil {
 		return userCasts, "", err

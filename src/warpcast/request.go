@@ -7,6 +7,16 @@ import (
 	"net/url"
 )
 
+type FCRequestClient struct {
+	BaseUrl        string
+	appBearerToken string
+	HTTPClient     *http.Client
+}
+
+func GetFCRequestClient(baseUrl string, appBearerToken string, httpClient *http.Client) *FCRequestClient {
+	return &FCRequestClient{BaseUrl: baseUrl, appBearerToken: appBearerToken, HTTPClient: httpClient}
+}
+
 func makeWarpcastRequest(
 	url string,
 	query url.Values,

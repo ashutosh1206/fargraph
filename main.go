@@ -18,10 +18,9 @@ func retrieveUserFollowers(
 	fid int,
 	username string,
 	pageLimit int,
-	appBearerToken string,
-	httpClient *http.Client,
+	fcClient *warpcast.FCRequestClient,
 ) error {
-	followersPaginated, cursor, err := warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	followersPaginated, cursor, err := fcClient.GetFollowersPaginated(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
@@ -30,7 +29,7 @@ func retrieveUserFollowers(
 		return err
 	}
 	for cursor != "" {
-		followersPaginated, cursor, err = warpcast.GetFollowersPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
+		followersPaginated, cursor, err = fcClient.GetFollowersPaginated(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}
@@ -48,10 +47,9 @@ func retrieveUserFollowing(
 	fid int,
 	username string,
 	pageLimit int,
-	appBearerToken string,
-	httpClient *http.Client,
+	fcClient *warpcast.FCRequestClient,
 ) error {
-	followingPaginated, cursor, err := warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, "", pageLimit)
+	followingPaginated, cursor, err := fcClient.GetFollowingPaginated(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
@@ -60,7 +58,7 @@ func retrieveUserFollowing(
 		return err
 	}
 	for cursor != "" {
-		followingPaginated, cursor, err = warpcast.GetFollowingPaginated(fid, appBearerToken, httpClient, cursor, pageLimit)
+		followingPaginated, cursor, err = fcClient.GetFollowingPaginated(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}
@@ -78,10 +76,9 @@ func retrieveUserLikedCasts(
 	fid int,
 	username string,
 	pageLimit int,
-	appBearerToken string,
-	httpClient *http.Client,
+	fcClient *warpcast.FCRequestClient,
 ) error {
-	likedPostsPaginated, cursor, err := warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	likedPostsPaginated, cursor, err := fcClient.GetUserLikedCasts(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
@@ -90,7 +87,7 @@ func retrieveUserLikedCasts(
 		return err
 	}
 	for cursor != "" {
-		likedPostsPaginated, cursor, err = warpcast.GetUserLikedCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		likedPostsPaginated, cursor, err = fcClient.GetUserLikedCasts(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}
@@ -108,10 +105,9 @@ func retrieveUserCasts(
 	fid int,
 	username string,
 	pageLimit int,
-	appBearerToken string,
-	httpClient *http.Client,
+	fcClient *warpcast.FCRequestClient,
 ) error {
-	userCastsPaginated, cursor, err := warpcast.GetUserCasts(fid, appBearerToken, httpClient, "", pageLimit)
+	userCastsPaginated, cursor, err := fcClient.GetUserCasts(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
@@ -120,7 +116,7 @@ func retrieveUserCasts(
 		return err
 	}
 	for cursor != "" {
-		userCastsPaginated, cursor, err = warpcast.GetUserCasts(fid, appBearerToken, httpClient, cursor, pageLimit)
+		userCastsPaginated, cursor, err = fcClient.GetUserCasts(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}
@@ -165,8 +161,9 @@ func main() {
 	pageLimit := 100
 
 	httpClient := http.DefaultClient
+	fcRequestClient := warpcast.GetFCRequestClient("https://api.warpcast.com", appBearerToken, httpClient)
 
-	userInfo, err := warpcast.GetUserInfoByUsername(username, appBearerToken, httpClient)
+	userInfo, err := fcRequestClient.GetUserInfoByUsername(username)
 	if err != nil {
 		panic(err)
 	}
@@ -179,28 +176,28 @@ func main() {
 	}
 
 	fmt.Println("Getting followers")
-	err = retrieveUserFollowers(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
+	err = retrieveUserFollowers(ctx, driver, fid, username, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted followers")
 
 	fmt.Println("Getting following")
-	err = retrieveUserFollowing(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
+	err = retrieveUserFollowing(ctx, driver, fid, username, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted following")
 
 	fmt.Println("Getting list of posts liked by user")
-	err = retrieveUserLikedCasts(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
+	err = retrieveUserLikedCasts(ctx, driver, fid, username, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted liked posts")
 
 	fmt.Println("Getting user casts, recasts and replies")
-	err = retrieveUserCasts(ctx, driver, fid, username, pageLimit, appBearerToken, httpClient)
+	err = retrieveUserCasts(ctx, driver, fid, username, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}

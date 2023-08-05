@@ -2,7 +2,6 @@ package warpcast
 
 import (
 	"encoding/json"
-	"net/http"
 	"net/url"
 )
 
@@ -12,7 +11,7 @@ type WarpcastUserInfoResponse struct {
 	} `json:"result"`
 }
 
-func GetUserInfoByUsername(username string, appBearerToken string, client *http.Client) (WarpcastUserInfo, error) {
+func (client *FCRequestClient) GetUserInfoByUsername(username string) (WarpcastUserInfo, error) {
 	var userInfo WarpcastUserInfo
 
 	query := make(url.Values, 1)
@@ -21,8 +20,8 @@ func GetUserInfoByUsername(username string, appBearerToken string, client *http.
 	respBody, err := makeWarpcastRequest(
 		"https://api.warpcast.com/v2/user-by-username",
 		query,
-		appBearerToken,
-		client,
+		client.appBearerToken,
+		client.HTTPClient,
 	)
 	if err != nil {
 		return userInfo, err
