@@ -1,4 +1,4 @@
-package warpcast
+package farcaster
 
 import (
 	"fmt"

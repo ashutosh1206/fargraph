@@ -3,13 +3,13 @@ package db
 import (
 	"context"
 
-	"github.com/farcaster-graph/src/warpcast"
+	"github.com/ashutosh1206/fargraph/pkg/farcaster"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 // TODO: optimise insertions with bulk-insertions
 
-func InsertFollowersToDB(ctx context.Context, driver neo4j.DriverWithContext, followers []warpcast.User, fid int) error {
+func InsertFollowersToDB(ctx context.Context, driver neo4j.DriverWithContext, followers []farcaster.User, fid int) error {
 	for _, follower := range followers {
 		err := InsertUserNodeToDB(ctx, driver, follower.Fid, follower.Username)
 		if err != nil {
@@ -23,7 +23,7 @@ func InsertFollowersToDB(ctx context.Context, driver neo4j.DriverWithContext, fo
 	return nil
 }
 
-func InsertFollowingToDB(ctx context.Context, driver neo4j.DriverWithContext, following []warpcast.User, fid int) error {
+func InsertFollowingToDB(ctx context.Context, driver neo4j.DriverWithContext, following []farcaster.User, fid int) error {
 	for _, followee := range following {
 		err := InsertUserNodeToDB(ctx, driver, followee.Fid, followee.Username)
 		if err != nil {
@@ -37,7 +37,7 @@ func InsertFollowingToDB(ctx context.Context, driver neo4j.DriverWithContext, fo
 	return nil
 }
 
-func InsertUserLikesToDB(ctx context.Context, driver neo4j.DriverWithContext, likedCasts []warpcast.Cast, fid int) error {
+func InsertUserLikesToDB(ctx context.Context, driver neo4j.DriverWithContext, likedCasts []farcaster.Cast, fid int) error {
 	for _, cast := range likedCasts {
 		// Create User node
 		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
@@ -63,7 +63,7 @@ func InsertUserLikesToDB(ctx context.Context, driver neo4j.DriverWithContext, li
 	return nil
 }
 
-func InsertUserPostsToDB(ctx context.Context, driver neo4j.DriverWithContext, casts []warpcast.Cast, fid int) error {
+func InsertUserPostsToDB(ctx context.Context, driver neo4j.DriverWithContext, casts []farcaster.Cast, fid int) error {
 	for _, cast := range casts {
 		// Create User node for Author
 		err := InsertUserNodeToDB(ctx, driver, cast.Author.Fid, cast.Author.Username)
