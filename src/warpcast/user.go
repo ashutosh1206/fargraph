@@ -17,8 +17,13 @@ func (client *FCRequestClient) GetUserInfoByUsername(username string) (User, err
 	query := make(url.Values, 1)
 	query.Add("username", username)
 
+	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/user-by-username")
+	if err != nil {
+		return userInfo, err
+	}
+
 	respBody, err := makeWarpcastRequest(
-		"https://api.warpcast.com/v2/user-by-username",
+		requestUrl,
 		query,
 		client.appBearerToken,
 		client.HTTPClient,

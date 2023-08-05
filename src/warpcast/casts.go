@@ -20,8 +20,13 @@ func (client *FCRequestClient) GetUserCastsPaginated(
 		query.Add("cursor", cursor)
 	}
 
+	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/casts")
+	if err != nil {
+		return userCasts, "", err
+	}
+
 	respBody, err := makeWarpcastRequest(
-		"https://api.warpcast.com/v2/casts",
+		requestUrl,
 		query,
 		client.appBearerToken,
 		client.HTTPClient,

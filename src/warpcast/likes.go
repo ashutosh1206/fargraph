@@ -39,8 +39,13 @@ func (client *FCRequestClient) GetUserLikedPaginated(fid int, cursor string, lim
 		query.Add("cursor", cursor)
 	}
 
+	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/user-liked-casts")
+	if err != nil {
+		return userLikedCasts, "", err
+	}
+
 	respBody, err := makeWarpcastRequest(
-		"https://api.warpcast.com/v2/user-liked-casts",
+		requestUrl,
 		query,
 		client.appBearerToken,
 		client.HTTPClient,
