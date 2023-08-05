@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-type WarpcastUserInfo struct {
+type User struct {
 	Fid         int    `json:"fid"`
 	Username    string `json:"username"`
 	DisplayName string `json:"displayName"`
@@ -28,9 +28,9 @@ type WarpcastUserInfo struct {
 	} `json:"viewerContext"`
 }
 
-type WarpcastResponse struct {
+type usersResponse struct {
 	Result struct {
-		Users []WarpcastUserInfo `json:"users"`
+		Users []User `json:"users"`
 	} `json:"result"`
 	Next struct {
 		Cursor string `json:"cursor"`
@@ -41,8 +41,8 @@ func (client *FCRequestClient) GetFollowersPaginated(
 	fid int,
 	cursor string,
 	limit int,
-) ([]WarpcastUserInfo, string, error) {
-	followers := make([]WarpcastUserInfo, 0, limit)
+) ([]User, string, error) {
+	followers := make([]User, 0, limit)
 
 	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
@@ -62,7 +62,7 @@ func (client *FCRequestClient) GetFollowersPaginated(
 	}
 
 	// Parsing the response
-	var responseStruct WarpcastResponse
+	var responseStruct usersResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
 		return followers, "", err
@@ -76,8 +76,8 @@ func (client *FCRequestClient) GetFollowingPaginated(
 	fid int,
 	cursor string,
 	limit int,
-) ([]WarpcastUserInfo, string, error) {
-	following := make([]WarpcastUserInfo, 0, limit)
+) ([]User, string, error) {
+	following := make([]User, 0, limit)
 
 	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
@@ -97,7 +97,7 @@ func (client *FCRequestClient) GetFollowingPaginated(
 	}
 
 	// Parsing the response
-	var responseStruct WarpcastResponse
+	var responseStruct usersResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
 		return following, "", err
