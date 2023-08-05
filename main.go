@@ -78,20 +78,20 @@ func retrieveUserLikedCasts(
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
-	likedPostsPaginated, cursor, err := fcClient.GetUserLikedCasts(fid, "", pageLimit)
+	likedCastsPaginated, cursor, err := fcClient.GetUserLikedPaginated(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
-	err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+	err = db.InsertUserLikesToDB(likedCastsPaginated, fid, username, ctx, driver)
 	if err != nil {
 		return err
 	}
 	for cursor != "" {
-		likedPostsPaginated, cursor, err = fcClient.GetUserLikedCasts(fid, cursor, pageLimit)
+		likedCastsPaginated, cursor, err = fcClient.GetUserLikedPaginated(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}
-		err = db.InsertUserLikesToDB(likedPostsPaginated, fid, username, ctx, driver)
+		err = db.InsertUserLikesToDB(likedCastsPaginated, fid, username, ctx, driver)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func retrieveUserCasts(
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
-	userCastsPaginated, cursor, err := fcClient.GetUserCasts(fid, "", pageLimit)
+	userCastsPaginated, cursor, err := fcClient.GetUserCastsPaginated(fid, "", pageLimit)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func retrieveUserCasts(
 		return err
 	}
 	for cursor != "" {
-		userCastsPaginated, cursor, err = fcClient.GetUserCasts(fid, cursor, pageLimit)
+		userCastsPaginated, cursor, err = fcClient.GetUserCastsPaginated(fid, cursor, pageLimit)
 		if err != nil {
 			return err
 		}

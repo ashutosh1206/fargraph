@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-type UserCastInfo struct {
+type Cast struct {
 	Hash       string `json:"hash"`
 	ParentHash string `json:"parentHash"`
 	Author     struct {
@@ -20,17 +20,17 @@ type UserCastInfo struct {
 	Recast bool `json:"recast"`
 }
 
-type userLikedCastsResponse struct {
+type castsResponse struct {
 	Result struct {
-		Casts []UserCastInfo `json:"casts"`
+		Casts []Cast `json:"casts"`
 	} `json:"result"`
 	Next struct {
 		Cursor string `json:"cursor"`
 	} `json:"next"`
 }
 
-func (client *FCRequestClient) GetUserLikedCasts(fid int, cursor string, limit int) ([]UserCastInfo, string, error) {
-	userLikedCasts := make([]UserCastInfo, 0, limit)
+func (client *FCRequestClient) GetUserLikedPaginated(fid int, cursor string, limit int) ([]Cast, string, error) {
+	userLikedCasts := make([]Cast, 0, limit)
 
 	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
@@ -50,7 +50,7 @@ func (client *FCRequestClient) GetUserLikedCasts(fid int, cursor string, limit i
 	}
 
 	// Parsing the response
-	var responseStruct userLikedCastsResponse
+	var responseStruct castsResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
 		return userLikedCasts, "", err

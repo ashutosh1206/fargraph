@@ -6,12 +6,12 @@ import (
 	"net/url"
 )
 
-func (client *FCRequestClient) GetUserCasts(
+func (client *FCRequestClient) GetUserCastsPaginated(
 	fid int,
 	cursor string,
 	limit int,
-) ([]UserCastInfo, string, error) {
-	userCasts := make([]UserCastInfo, 0, limit)
+) ([]Cast, string, error) {
+	userCasts := make([]Cast, 0, limit)
 
 	query := make(url.Values, 3)
 	query.Add("fid", fmt.Sprint(fid))
@@ -31,7 +31,7 @@ func (client *FCRequestClient) GetUserCasts(
 	}
 
 	// Parsing the response
-	var responseStruct userLikedCastsResponse
+	var responseStruct castsResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
 		return userCasts, "", err

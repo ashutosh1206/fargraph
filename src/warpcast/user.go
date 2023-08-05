@@ -5,14 +5,14 @@ import (
 	"net/url"
 )
 
-type WarpcastUserInfoResponse struct {
+type userResponse struct {
 	Result struct {
-		User WarpcastUserInfo
+		User User
 	} `json:"result"`
 }
 
-func (client *FCRequestClient) GetUserInfoByUsername(username string) (WarpcastUserInfo, error) {
-	var userInfo WarpcastUserInfo
+func (client *FCRequestClient) GetUserInfoByUsername(username string) (User, error) {
+	var userInfo User
 
 	query := make(url.Values, 1)
 	query.Add("username", username)
@@ -28,7 +28,7 @@ func (client *FCRequestClient) GetUserInfoByUsername(username string) (WarpcastU
 	}
 
 	// Parsing the response
-	var responseStruct WarpcastUserInfoResponse
+	var responseStruct userResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
 		return userInfo, err
