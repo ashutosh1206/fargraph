@@ -131,6 +131,11 @@ func main() {
 		panic(err)
 	}
 
+	if len(os.Args) <= 1 {
+		fmt.Println("Usage: fargraph <username>")
+		return
+	}
+
 	ctx := context.Background()
 
 	driver, err := neo4j.NewDriverWithContext(
@@ -148,10 +153,8 @@ func main() {
 	}
 	fmt.Println("Database connected!")
 
-	// TODO: user input
-	username := "ashutosh"
+	username := os.Args[1]
 
-	// TODO: get app bearer token programmatically
 	appBearerToken := os.Getenv("APP_BEARER_TOKEN")
 
 	pageLimit := 100
