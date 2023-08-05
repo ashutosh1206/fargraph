@@ -16,7 +16,6 @@ func retrieveUserFollowers(
 	ctx context.Context,
 	driver neo4j.DriverWithContext,
 	fid int,
-	username string,
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
@@ -24,7 +23,7 @@ func retrieveUserFollowers(
 	if err != nil {
 		return err
 	}
-	err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
+	err = db.InsertFollowersToDB(followersPaginated, fid, ctx, driver)
 	if err != nil {
 		return err
 	}
@@ -33,7 +32,7 @@ func retrieveUserFollowers(
 		if err != nil {
 			return err
 		}
-		err = db.InsertFollowersToDB(followersPaginated, username, fid, ctx, driver)
+		err = db.InsertFollowersToDB(followersPaginated, fid, ctx, driver)
 		if err != nil {
 			return err
 		}
@@ -45,7 +44,6 @@ func retrieveUserFollowing(
 	ctx context.Context,
 	driver neo4j.DriverWithContext,
 	fid int,
-	username string,
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
@@ -53,7 +51,7 @@ func retrieveUserFollowing(
 	if err != nil {
 		return err
 	}
-	err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
+	err = db.InsertFollowingToDB(followingPaginated, fid, ctx, driver)
 	if err != nil {
 		return err
 	}
@@ -62,7 +60,7 @@ func retrieveUserFollowing(
 		if err != nil {
 			return err
 		}
-		err = db.InsertFollowingToDB(followingPaginated, username, fid, ctx, driver)
+		err = db.InsertFollowingToDB(followingPaginated, fid, ctx, driver)
 		if err != nil {
 			return err
 		}
@@ -74,7 +72,6 @@ func retrieveUserLikedCasts(
 	ctx context.Context,
 	driver neo4j.DriverWithContext,
 	fid int,
-	username string,
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
@@ -82,7 +79,7 @@ func retrieveUserLikedCasts(
 	if err != nil {
 		return err
 	}
-	err = db.InsertUserLikesToDB(likedCastsPaginated, fid, username, ctx, driver)
+	err = db.InsertUserLikesToDB(likedCastsPaginated, fid, ctx, driver)
 	if err != nil {
 		return err
 	}
@@ -91,7 +88,7 @@ func retrieveUserLikedCasts(
 		if err != nil {
 			return err
 		}
-		err = db.InsertUserLikesToDB(likedCastsPaginated, fid, username, ctx, driver)
+		err = db.InsertUserLikesToDB(likedCastsPaginated, fid, ctx, driver)
 		if err != nil {
 			return err
 		}
@@ -103,7 +100,6 @@ func retrieveUserCasts(
 	ctx context.Context,
 	driver neo4j.DriverWithContext,
 	fid int,
-	username string,
 	pageLimit int,
 	fcClient *warpcast.FCRequestClient,
 ) error {
@@ -111,7 +107,7 @@ func retrieveUserCasts(
 	if err != nil {
 		return err
 	}
-	err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+	err = db.InsertUserPostsToDB(userCastsPaginated, fid, ctx, driver)
 	if err != nil {
 		return err
 	}
@@ -120,7 +116,7 @@ func retrieveUserCasts(
 		if err != nil {
 			return err
 		}
-		err = db.InsertUserPostsToDB(userCastsPaginated, fid, username, ctx, driver)
+		err = db.InsertUserPostsToDB(userCastsPaginated, fid, ctx, driver)
 		if err != nil {
 			return err
 		}
@@ -176,28 +172,28 @@ func main() {
 	}
 
 	fmt.Println("Getting followers")
-	err = retrieveUserFollowers(ctx, driver, fid, username, pageLimit, fcRequestClient)
+	err = retrieveUserFollowers(ctx, driver, fid, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted followers")
 
 	fmt.Println("Getting following")
-	err = retrieveUserFollowing(ctx, driver, fid, username, pageLimit, fcRequestClient)
+	err = retrieveUserFollowing(ctx, driver, fid, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted following")
 
 	fmt.Println("Getting list of posts liked by user")
-	err = retrieveUserLikedCasts(ctx, driver, fid, username, pageLimit, fcRequestClient)
+	err = retrieveUserLikedCasts(ctx, driver, fid, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Inserted liked posts")
 
 	fmt.Println("Getting user casts, recasts and replies")
-	err = retrieveUserCasts(ctx, driver, fid, username, pageLimit, fcRequestClient)
+	err = retrieveUserCasts(ctx, driver, fid, pageLimit, fcRequestClient)
 	if err != nil {
 		panic(err)
 	}
