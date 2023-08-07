@@ -1,6 +1,6 @@
 # Farcaster Graph
 
-Export your entire Farcaster social graph / activity to a Neo4j Graph Database
+Export your entire [Farcaster](https://www.farcaster.xyz/) social graph / activity to a Neo4j Graph Database
 
 ## Setting up and running the tool
 
