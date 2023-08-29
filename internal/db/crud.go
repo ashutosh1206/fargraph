@@ -7,10 +7,13 @@ import (
 )
 
 func InsertUserNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, fid int, username string) error {
+	// Set username each time InsertUserNodeToDB is called
+	// so that User node contains the latest username
+
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
-		"MERGE (u:User {fid: $fid, username: $username})",
+		"MERGE (u:User {fid: $fid}) SET u.username = $username",
 		map[string]any{"fid": fid, "username": username},
 		neo4j.EagerResultTransformer,
 	)
