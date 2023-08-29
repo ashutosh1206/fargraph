@@ -45,7 +45,7 @@ func InsertUserLikesToDB(ctx context.Context, driver neo4j.DriverWithContext, li
 			return err
 		}
 		// Create Cast node
-		err = InsertCastNodeToDB(ctx, driver, cast.Hash)
+		err = InsertCastNodeToDB(ctx, driver, cast.Hash, cast.Text)
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func InsertUserPostsToDB(ctx context.Context, driver neo4j.DriverWithContext, ca
 		}
 
 		// Create Cast node
-		err = InsertCastNodeToDB(ctx, driver, cast.Hash)
+		err = InsertCastNodeToDB(ctx, driver, cast.Hash, cast.Text)
 		if err != nil {
 			return err
 		}
@@ -108,7 +108,8 @@ func InsertUserPostsToDB(ctx context.Context, driver neo4j.DriverWithContext, ca
 		}
 
 		// Create Cast node for parent cast
-		err = InsertCastNodeToDB(ctx, driver, cast.ParentHash)
+		// Text of parent cast is not available in the response body
+		err = InsertCastNodeToDB(ctx, driver, cast.ParentHash, "")
 		if err != nil {
 			return err
 		}
