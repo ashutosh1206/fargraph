@@ -2,6 +2,7 @@ package fargraph
 
 import (
 	"context"
+	"sync"
 
 	"github.com/ashutosh1206/fargraph/internal/db"
 	"github.com/ashutosh1206/fargraph/pkg/farcaster"
@@ -14,26 +15,30 @@ func RetrieveUserFollowers(
 	fid int,
 	pageLimit int,
 	fcClient *farcaster.FCRequestClient,
-) error {
+	ch chan error,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	followersPaginated, cursor, err := fcClient.GetFollowersPaginated(fid, "", pageLimit)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	err = db.InsertFollowersToDB(ctx, driver, followersPaginated, fid)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	for cursor != "" {
 		followersPaginated, cursor, err = fcClient.GetFollowersPaginated(fid, cursor, pageLimit)
 		if err != nil {
-			return err
+			ch <- err
 		}
 		err = db.InsertFollowersToDB(ctx, driver, followersPaginated, fid)
 		if err != nil {
-			return err
+			ch <- err
 		}
 	}
-	return nil
+	ch <- nil
 }
 
 func RetrieveUserFollowing(
@@ -42,26 +47,30 @@ func RetrieveUserFollowing(
 	fid int,
 	pageLimit int,
 	fcClient *farcaster.FCRequestClient,
-) error {
+	ch chan error,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	followingPaginated, cursor, err := fcClient.GetFollowingPaginated(fid, "", pageLimit)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	err = db.InsertFollowingToDB(ctx, driver, followingPaginated, fid)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	for cursor != "" {
 		followingPaginated, cursor, err = fcClient.GetFollowingPaginated(fid, cursor, pageLimit)
 		if err != nil {
-			return err
+			ch <- err
 		}
 		err = db.InsertFollowingToDB(ctx, driver, followingPaginated, fid)
 		if err != nil {
-			return err
+			ch <- err
 		}
 	}
-	return nil
+	ch <- nil
 }
 
 func RetrieveUserLikedCasts(
@@ -70,26 +79,30 @@ func RetrieveUserLikedCasts(
 	fid int,
 	pageLimit int,
 	fcClient *farcaster.FCRequestClient,
-) error {
+	ch chan error,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	likedCastsPaginated, cursor, err := fcClient.GetUserLikedPaginated(fid, "", pageLimit)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	err = db.InsertUserLikesToDB(ctx, driver, likedCastsPaginated, fid)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	for cursor != "" {
 		likedCastsPaginated, cursor, err = fcClient.GetUserLikedPaginated(fid, cursor, pageLimit)
 		if err != nil {
-			return err
+			ch <- err
 		}
 		err = db.InsertUserLikesToDB(ctx, driver, likedCastsPaginated, fid)
 		if err != nil {
-			return err
+			ch <- err
 		}
 	}
-	return nil
+	ch <- nil
 }
 
 func RetrieveUserCasts(
@@ -98,24 +111,28 @@ func RetrieveUserCasts(
 	fid int,
 	pageLimit int,
 	fcClient *farcaster.FCRequestClient,
-) error {
+	ch chan error,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	userCastsPaginated, cursor, err := fcClient.GetUserCastsPaginated(fid, "", pageLimit)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	err = db.InsertUserPostsToDB(ctx, driver, userCastsPaginated, fid)
 	if err != nil {
-		return err
+		ch <- err
 	}
 	for cursor != "" {
 		userCastsPaginated, cursor, err = fcClient.GetUserCastsPaginated(fid, cursor, pageLimit)
 		if err != nil {
-			return err
+			ch <- err
 		}
 		err = db.InsertUserPostsToDB(ctx, driver, userCastsPaginated, fid)
 		if err != nil {
-			return err
+			ch <- err
 		}
 	}
-	return nil
+	ch <- nil
 }
