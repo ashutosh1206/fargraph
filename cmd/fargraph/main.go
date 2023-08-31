@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/ashutosh1206/fargraph/internal/db"
 	"github.com/ashutosh1206/fargraph/internal/fargraph"
@@ -63,33 +64,34 @@ func main() {
 		panic(err)
 	}
 
+	var wg sync.WaitGroup
+	ch := make(chan error, 4)
+
 	fmt.Println("Getting followers")
-	err = fargraph.RetrieveUserFollowers(ctx, driver, fid, pageLimit, fcRequestClient)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Inserted followers")
+	wg.Add(1)
+	go fargraph.RetrieveUserFollowers(ctx, driver, fid, pageLimit, fcRequestClient, ch, &wg)
 
 	fmt.Println("Getting following")
-	err = fargraph.RetrieveUserFollowing(ctx, driver, fid, pageLimit, fcRequestClient)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Inserted following")
+	wg.Add(1)
+	go fargraph.RetrieveUserFollowing(ctx, driver, fid, pageLimit, fcRequestClient, ch, &wg)
 
 	fmt.Println("Getting list of posts liked by user")
-	err = fargraph.RetrieveUserLikedCasts(ctx, driver, fid, pageLimit, fcRequestClient)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Inserted liked posts")
+	wg.Add(1)
+	go fargraph.RetrieveUserLikedCasts(ctx, driver, fid, pageLimit, fcRequestClient, ch, &wg)
 
 	fmt.Println("Getting user casts, recasts and replies")
-	err = fargraph.RetrieveUserCasts(ctx, driver, fid, pageLimit, fcRequestClient)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Inserted user casts, recasts and replies")
+	wg.Add(1)
+	go fargraph.RetrieveUserCasts(ctx, driver, fid, pageLimit, fcRequestClient, ch, &wg)
 
-	httpClient.CloseIdleConnections()
+	go func() {
+		wg.Wait()
+		close(ch)
+		httpClient.CloseIdleConnections()
+	}()
+
+	for err := range ch {
+		if err != nil {
+			panic(err)
+		}
+	}
 }
