@@ -20,12 +20,25 @@ func InsertUserNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, fid
 	return err
 }
 
-func InsertCastNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, hash string) error {
+func InsertCastNodeToDB(ctx context.Context, driver neo4j.DriverWithContext, hash string, text string) error {
+	if text == "" {
+		_, err := neo4j.ExecuteQuery(
+			ctx,
+			driver,
+			"MERGE (c:Cast {hash: $hash})",
+			map[string]any{"hash": hash},
+			neo4j.EagerResultTransformer,
+		)
+		return err
+	}
+
+	// Set cast text only if it's non-empty and node is created as a result of the query
+
 	_, err := neo4j.ExecuteQuery(
 		ctx,
 		driver,
-		"MERGE (c:Cast {hash: $hash})",
-		map[string]any{"hash": hash},
+		"MERGE (c:Cast {hash: $hash}) ON CREATE SET c.text = $text",
+		map[string]any{"hash": hash, "text": text},
 		neo4j.EagerResultTransformer,
 	)
 	return err

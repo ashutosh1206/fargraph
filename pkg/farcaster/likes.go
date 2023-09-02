@@ -17,7 +17,8 @@ type Cast struct {
 		Fid      int    `json:"fid"`
 		Username string `json:"username"`
 	} `json:"parentAuthor"`
-	Recast bool `json:"recast"`
+	Text   string `json:"text"`
+	Recast bool   `json:"recast"`
 }
 
 type castsResponse struct {
