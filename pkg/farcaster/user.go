@@ -75,15 +75,16 @@ func (client *FCRequestClient) GetRecentUsersPaginated(cursor string, limit int)
 	return users, responseStruct.Next.Cursor, nil
 }
 
-func (client *FCRequestClient) GetUserByFid(fid int) (User, error) {
+func (client *FCRequestClient) GetUserByFid(fid int) (User, User, error) {
 	var userInfo User
+	var inviterInfo User
 
 	query := make(url.Values, 1)
 	query.Add("fid", fmt.Sprint(fid))
 
 	requestUrl, err := url.JoinPath(client.BaseUrl, "/v2/user")
 	if err != nil {
-		return userInfo, err
+		return userInfo, inviterInfo, err
 	}
 
 	respBody, err := makeWarpcastRequest(
@@ -93,16 +94,17 @@ func (client *FCRequestClient) GetUserByFid(fid int) (User, error) {
 		client.HTTPClient,
 	)
 	if err != nil {
-		return userInfo, err
+		return userInfo, inviterInfo, err
 	}
 
 	// Parsing the response
 	var responseStruct userResponse
 	err = json.Unmarshal(respBody, &responseStruct)
 	if err != nil {
-		return userInfo, err
+		return userInfo, inviterInfo, err
 	}
 	userInfo = responseStruct.Result.User
+	inviterInfo = responseStruct.Result.Inviter
 
-	return userInfo, nil
+	return userInfo, inviterInfo, nil
 }
