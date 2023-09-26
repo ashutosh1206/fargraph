@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/ashutosh1206/fargraph/internal/db"
 	"github.com/ashutosh1206/fargraph/pkg/farcaster"
@@ -24,7 +25,8 @@ func main() {
 	appBearerToken := os.Getenv("APP_BEARER_TOKEN")
 
 	// maxFid := 20271
-	maxFid := 20
+	maxFid := 20271
+	MAX_CONCURRENT_JOBS := 100
 
 	driver, err := neo4j.NewDriverWithContext(
 		os.Getenv("DB_URI"),
@@ -47,29 +49,54 @@ func main() {
 	bar := progressbar.Default(int64(maxFid), "Users retrieved")
 	defer bar.Close()
 
+	var wg sync.WaitGroup
+	ch := make(chan error)
+	waitCh := make(chan struct{}, MAX_CONCURRENT_JOBS)
+
 	for fid := maxFid; fid > 0; fid-- {
-		userInfo, inviterInfo, err := fcRequestClient.GetUserByFid(fid)
+		waitCh <- struct{}{}
+		wg.Add(1)
+
+		go func(fid int) {
+			defer wg.Done()
+
+			userInfo, inviterInfo, err := fcRequestClient.GetUserByFid(fid)
+			if err != nil {
+				ch <- err
+			}
+
+			err = db.InsertUserNodeToDB(ctx, driver, userInfo.Fid, userInfo.Username)
+			if err != nil {
+				ch <- err
+			}
+
+			if inviterInfo.Fid != 0 {
+				err = db.InsertUserNodeToDB(ctx, driver, inviterInfo.Fid, inviterInfo.Username)
+				if err != nil {
+					ch <- err
+				}
+
+				err = db.CreateInvitedEdge(ctx, driver, userInfo.Fid, inviterInfo.Fid)
+				if err != nil {
+					ch <- err
+				}
+			}
+
+			bar.Add(1)
+			<-waitCh
+		}(fid)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+		close(waitCh)
+		httpClient.CloseIdleConnections()
+	}()
+
+	for err := range ch {
 		if err != nil {
 			panic(err)
 		}
-
-		err = db.InsertUserNodeToDB(ctx, driver, userInfo.Fid, userInfo.Username)
-		if err != nil {
-			panic(err)
-		}
-
-		if inviterInfo.Fid != 0 {
-			err = db.InsertUserNodeToDB(ctx, driver, inviterInfo.Fid, inviterInfo.Username)
-			if err != nil {
-				panic(err)
-			}
-
-			err = db.CreateInvitedEdge(ctx, driver, userInfo.Fid, inviterInfo.Fid)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		bar.Add(1)
 	}
 }
