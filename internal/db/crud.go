@@ -109,3 +109,15 @@ func CreateChildOfEdge(ctx context.Context, driver neo4j.DriverWithContext, pare
 	)
 	return err
 }
+
+func CreateInvitedEdge(ctx context.Context, driver neo4j.DriverWithContext, fid int, inviterFid int) error {
+	// There's a UNIQUE constraint on FID, hence it's sufficient to match a node without username
+	_, err := neo4j.ExecuteQuery(
+		ctx,
+		driver,
+		"MATCH (u:User {fid: $fid}),(i:User {fid: $inviterFid}) MERGE (i)-[:INVITED]-(u)",
+		map[string]any{"fid": fid, "inviterFid": inviterFid},
+		neo4j.EagerResultTransformer,
+	)
+	return err
+}
