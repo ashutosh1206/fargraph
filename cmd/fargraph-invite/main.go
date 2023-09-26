@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/ashutosh1206/fargraph/internal/db"
@@ -24,8 +25,15 @@ func main() {
 	ctx := context.Background()
 	appBearerToken := os.Getenv("APP_BEARER_TOKEN")
 
-	// maxFid := 20271
-	maxFid := 20271
+	if len(os.Args) <= 1 {
+		fmt.Println("Usage: fargraph <max_fid_value_to_fetch>")
+		return
+	}
+
+	maxFid, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		panic(err)
+	}
 	MAX_CONCURRENT_JOBS := 100
 
 	driver, err := neo4j.NewDriverWithContext(
